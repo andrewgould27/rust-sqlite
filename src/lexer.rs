@@ -44,8 +44,10 @@ impl<'a> Lexer<'a> {
                 ')' => Token::RightParen,
                 '=' | '>' | '<' => {
                     let mut op = ch.to_string();
-                    if let Some('=') = self.input.peek() {
-                        op.push(self.input.next().unwrap());
+                    if let Some(&next_ch) = self.input.peek() {
+                        if (ch == '<' && next_ch == '=') || (ch == '>' && next_ch == '=') || (ch == '<' && next_ch == '>') {
+                            op.push(self.input.next().unwrap());
+                        }
                     }
                     Token::Operator(op)
                 }
