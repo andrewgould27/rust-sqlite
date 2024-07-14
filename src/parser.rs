@@ -35,7 +35,7 @@ impl<'a> Parser<'a> {
     pub fn parse(&mut self) -> Result<ASTNode, String> {
         match self.current_token {
             Token::Select => self.parse_select(),
-            // Token::Insert => self.parse_insert(),
+            Token::Insert => self.parse_insert(),
             _ => Err("Unexpected token".to_string())
         }
     }
@@ -74,9 +74,46 @@ impl<'a> Parser<'a> {
         }))
     }
 
-    // pub fn parse_insert(&mut self) -> Result<ASTNode, String> {
-        // Gimme a minute
-    // }
+    pub fn parse_insert(&mut self) -> Result<ASTNode, String> {
+        self.advance();
+
+        if self.current_token != Token::Into {
+            return Err("Expected INTO after INSERT".to_string());
+        }
+        self.advance();
+
+        let table = match &self.current_token {
+            Token::Identifier(name) => {
+                let table_name = name.clone();
+                self.advance();
+                table_name
+            }
+            _ => return Err("Expected identifier".to_string())
+        };
+
+        let columns = if self.current_token == Token::LeftParen {
+            self.parse_column_list()?
+        } else {
+            Vec::new()
+        };
+
+        if self.current_token != Token::Values {
+            return Err("Expected values keyword".to_string());
+        }
+        self.advance();
+
+        let values = self.parse_value_list()?;
+
+        if columns.len() > 0 && columns.len() != values.len() {
+            return Err("Number of columns doesn't match number of values".to_string());
+        }
+
+        Ok(ASTNode::Insert(InsertStatement {
+            table, 
+            columns, 
+            values, 
+        }))
+    }
 
     pub fn parse_columns(&mut self) -> Result<Vec<String>, String> {
         let mut columns = Vec::new();
@@ -102,6 +139,72 @@ impl<'a> Parser<'a> {
         }
 
         Ok(columns)
+    }
+
+    pub fn parse_column_list(&mut self) -> Result<Vec<String>, String> {
+        self.advance();
+        let mut columns: Vec<String> = Vec::new();
+
+        loop {
+            match &self.current_token {
+                Token::Identifier(name) => {
+                    columns.push(name.clone());
+                    self.advance();
+                }
+                _ => return Err("Expected column name".to_string())
+            }
+
+            match self.current_token {
+                Token::Comma => {
+                    self.advance();
+                    continue;
+                }
+                Token::RightParen => {
+                    self.advance();
+                    break;
+                }
+                _ => return Err("Expected comma or right parens".to_string())
+            }
+        }
+
+        Ok(columns)
+    }
+
+    pub fn parse_value_list(&mut self) -> Result<Vec<Value>, String> {
+        if self.current_token != Token::LeftParen {
+            return Err("Expected left parens before values".to_string());
+        }
+        self.advance();
+
+        let mut values = Vec::new();
+
+        loop {
+            match &self.current_token {
+                Token::Number(n) => {
+                    values.push(Value::Number(*n));
+                    self.advance();
+                }
+                Token::String(s) => {
+                    values.push(Value::String(s.clone()));
+                    self.advance();
+                }
+                _ => return Err("Expected value".to_string())
+            }
+
+            match self.current_token {
+                Token::Comma => {
+                    self.advance();
+                    continue;
+                }
+                Token::RightParen => {
+                    self.advance();
+                    break;
+                }
+                _ => return Err("Expected comma or right parens".to_string())
+            }
+        }
+
+        Ok(values)
     }
 
     pub fn parse_condition(&mut self) -> Result<Condition, String> {

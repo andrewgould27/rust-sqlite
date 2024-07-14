@@ -13,7 +13,9 @@ pub struct SelectStatement {
 
 #[derive(Debug, PartialEq)]
 pub struct InsertStatement {
-
+    pub table: String, 
+    pub columns: Vec<String>,
+    pub values: Vec<Value>
 }
 
 #[derive(Debug, PartialEq)]
