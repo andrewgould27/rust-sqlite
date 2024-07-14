@@ -86,7 +86,7 @@ mod tests {
     }
 
     #[test]
-    fn test_update() {
+    fn test_simple_update() {
         let ast = parse_sql("UPDATE users SET name = 'Andrew' WHERE id = 27").unwrap();
         assert_eq!(ast, 
             ASTNode::Update(UpdateStatement {
@@ -97,5 +97,32 @@ mod tests {
                 condition: Some(Condition::Comparison("id".to_string(), ComparisonOperator::Equals, Value::Number(27.0)))
             })
         )
+    }
+
+    #[test]
+    fn test_update_multiple_columns() {
+        let ast = parse_sql("UPDATE products SET price = 19.99, stock = 100 WHERE category = 'Sports'").unwrap();
+        assert_eq!(ast, 
+            ASTNode::Update(UpdateStatement {
+                table: "products".to_string(),
+                updates: vec![
+                    ("price".to_string(), Value::Number(19.99)), 
+                    ("stock".to_string(), Value::Number(100.0))
+                ],
+                condition: Some(Condition::Comparison("category".to_string(), ComparisonOperator::Equals, Value::String("Sports".to_string())))
+            })
+        )
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_bad_select_statement() {
+        parse_sql("SELECT FROM id WHERE name = 'Andrew'").unwrap();
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_bad_update_statement() {
+        parse_sql("UPDATE table SET = 10").unwrap();
     }
 }
