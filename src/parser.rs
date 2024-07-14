@@ -39,6 +39,7 @@ impl<'a> Parser<'a> {
             Token::Select => self.parse_select(),
             Token::Insert => self.parse_insert(),
             Token::Delete => self.parse_delete(),
+            Token::Update => self.parse_update(),
             _ => Err("Unexpected token".to_string())
         }
     }
@@ -118,9 +119,82 @@ impl<'a> Parser<'a> {
         }))
     }
 
-    // pub fn parse_update(&mut self) -> Result<Vec<String>, String> {
-    //
-    // }
+    pub fn parse_update(&mut self) -> Result<ASTNode, String> {
+        self.advance();
+
+        let table = match &self.current_token {
+            Token::Identifier(name) => {
+                let table_name = name.clone();
+                self.advance();
+                table_name 
+            }
+            _ => return Err("Expected table name after UPDATE.".to_string())
+        }; 
+
+        if self.current_token != Token::Set {
+            return Err("Expected SET after table name in UPDATE statement.".to_string());
+        }
+        self.advance();
+
+        let updates = self.parse_update_list()?;
+
+        let condition = if self.current_token == Token::Where {
+            self.advance();
+            Some(self.parse_condition()?)
+        } else {
+            None 
+        };
+
+        Ok(ASTNode::Update(UpdateStatement {
+            table,
+            updates,
+            condition 
+        }))
+    }
+
+    pub fn parse_update_list(&mut self) -> Result<Vec<(String, Value)>, String> {
+        let mut updates = Vec::new();
+
+        loop {
+            let column = match &self.current_token {
+                Token::Identifier(name) => {
+                    let column_name = name.clone();
+                    self.advance();
+                    column_name
+                }
+                _ => return Err("Expected column name in UPDATE statement.".to_string())
+            };
+
+            if self.current_token != Token::Operator(String::from("=")) {
+                return Err("Expected '=' after column name in UPDATE statement.".to_string());
+            }
+            self.advance();
+
+            let value = match &self.current_token {
+                Token::Number(n) => {
+                    let num = *n;
+                    self.advance();
+                    Value::Number(num)
+                }
+                Token::String(s) => {
+                    let string_val = s.clone();
+                    self.advance();
+                    Value::String(string_val)
+                }
+                _ => return Err("Expected value in UPDATE statement.".to_string())
+            };
+
+            updates.push((column, value));
+
+            if self.current_token != Token::Comma {
+                break;
+            }
+
+            self.advance();
+        }
+
+        Ok(updates)
+    }
 
     pub fn parse_delete(&mut self) -> Result<ASTNode, String> {
         self.advance();

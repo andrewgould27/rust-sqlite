@@ -4,12 +4,7 @@ mod tests {
     use rust_sqlite::lexer::Lexer;
     use rust_sqlite::parser::Parser;
     use rust_sqlite::ast::{
-        ASTNode, 
-        SelectStatement,
-        InsertStatement,
-        Condition,
-        Value,
-        ComparisonOperator
+        ASTNode, ComparisonOperator, Condition, InsertStatement, SelectStatement, UpdateStatement, Value
     };
 
     fn parse_sql(sql: &str) -> Result<ASTNode, String> {
@@ -88,5 +83,19 @@ mod tests {
                 })
             );
         }
+    }
+
+    #[test]
+    fn test_update() {
+        let ast = parse_sql("UPDATE users SET name = 'Andrew' WHERE id = 27").unwrap();
+        assert_eq!(ast, 
+            ASTNode::Update(UpdateStatement {
+                table: "users".to_string(),
+                updates: vec![
+                    ("name".to_string(), Value::String("Andrew".to_string()))
+                ],
+                condition: Some(Condition::Comparison("id".to_string(), ComparisonOperator::Equals, Value::Number(27.0)))
+            })
+        )
     }
 }

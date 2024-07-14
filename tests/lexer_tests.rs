@@ -135,4 +135,22 @@ mod tests {
             Token::String("Andrew".to_string())
         ]);
     }
+
+    #[test]
+    fn test_update() {
+        let sql = "UPDATE users SET name = 'Andrew' WHERE id < 10";
+        let tokens: Vec<Token> = Lexer::new(sql).collect();
+        assert_eq!(tokens, vec![
+            Token::Update,
+            Token::Identifier("users".to_string()),
+            Token::Set, 
+            Token::Identifier("name".to_string()),
+            Token::Operator("=".to_string()),
+            Token::String("Andrew".to_string()),
+            Token::Where, 
+            Token::Identifier("id".to_string()),
+            Token::Operator("<".to_string()),
+            Token::Number(10.0)
+        ]);
+    }
 }

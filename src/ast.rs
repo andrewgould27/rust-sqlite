@@ -22,7 +22,9 @@ pub struct InsertStatement {
 
 #[derive(Debug, PartialEq)]
 pub struct UpdateStatement {
-
+    pub table: String, 
+    pub updates: Vec<(String, Value)>,
+    pub condition: Option<Condition>
 }
 
 #[derive(Debug, PartialEq)]
