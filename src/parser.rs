@@ -7,6 +7,8 @@ use crate::ast::{
     ASTNode, 
     SelectStatement,
     InsertStatement,
+    UpdateStatement,
+    DeleteStatement,
     Condition,
     ComparisonOperator,
     Value
@@ -36,6 +38,7 @@ impl<'a> Parser<'a> {
         match self.current_token {
             Token::Select => self.parse_select(),
             Token::Insert => self.parse_insert(),
+            Token::Delete => self.parse_delete(),
             _ => Err("Unexpected token".to_string())
         }
     }
@@ -113,6 +116,44 @@ impl<'a> Parser<'a> {
             columns, 
             values, 
         }))
+    }
+
+    // pub fn parse_update(&mut self) -> Result<Vec<String>, String> {
+    //
+    // }
+
+    pub fn parse_delete(&mut self) -> Result<ASTNode, String> {
+        self.advance();
+
+        if self.current_token != Token::From {
+            return Err("Expected FROM after DELETE".to_string());
+        }
+        self.advance();
+
+        let table = match &self.current_token {
+            Token::Identifier(name) => {
+                let table_name = name.clone();
+                self.advance();
+                table_name
+            }
+            _ => return Err("Expected table name after FROM".to_string())
+        };
+
+        let condition = if self.current_token == Token::Where {
+            self.advance();
+            Some(self.parse_condition()?)
+        } else {
+            None 
+        };
+
+        Ok(
+            ASTNode::Delete(
+                DeleteStatement { 
+                    table, 
+                    condition 
+                }
+            )
+        )
     }
 
     pub fn parse_columns(&mut self) -> Result<Vec<String>, String> {

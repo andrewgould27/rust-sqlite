@@ -1,7 +1,9 @@
 #[derive(Debug, PartialEq)]
 pub enum ASTNode {
     Select(SelectStatement),
-    Insert(InsertStatement)
+    Insert(InsertStatement),
+    Delete(DeleteStatement),
+    Update(UpdateStatement)
 }
 
 #[derive(Debug, PartialEq)]
@@ -16,6 +18,17 @@ pub struct InsertStatement {
     pub table: String, 
     pub columns: Vec<String>,
     pub values: Vec<Value>
+}
+
+#[derive(Debug, PartialEq)]
+pub struct UpdateStatement {
+
+}
+
+#[derive(Debug, PartialEq)]
+pub struct DeleteStatement {
+    pub table: String, 
+    pub condition: Option<Condition>
 }
 
 #[derive(Debug, PartialEq)]

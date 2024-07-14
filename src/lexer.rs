@@ -7,6 +7,8 @@ use std::{
 pub enum Token {
     Select, 
     Insert,
+    Delete, 
+    Update,
     Into,
     Values,
     From,
@@ -63,7 +65,9 @@ impl<'a> Lexer<'a> {
                     let ident = self.read_identifier(ch);
                     match ident.to_uppercase().as_str() {
                         "SELECT" => Token::Select,
-                        "INSERT" => Token::Insert, 
+                        "INSERT" => Token::Insert,
+                        "UPDATE" => Token::Update, 
+                        "DELETE" => Token::Delete, 
                         "FROM" => Token::From, 
                         "WHERE" => Token::Where, 
                         "INTO" => Token::Into, 

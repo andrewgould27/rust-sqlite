@@ -102,8 +102,6 @@ mod tests {
         let sql = "INSERT INTO users (name, age) VALUES ('John Doe', 30)";
         let tokens: Vec<Token> = Lexer::new(sql).collect();
 
-        println!("Actual tokens: {:?}", tokens);
-
         assert_eq!(tokens, vec![
             Token::Insert,
             Token::Into,
@@ -119,6 +117,22 @@ mod tests {
             Token::Comma,
             Token::Number(30.0),
             Token::RightParen,
+        ]);
+    }
+
+    #[test]
+    fn test_delete() {
+        let sql = "DELETE FROM tables WHERE name = 'Andrew'";
+        let tokens: Vec<Token> = Lexer::new(sql).collect();
+
+        assert_eq!(tokens, vec![
+            Token::Delete,
+            Token::From,
+            Token::Identifier("tables".to_string()),
+            Token::Where, 
+            Token::Identifier("name".to_string()),
+            Token::Operator("=".to_string()),
+            Token::String("Andrew".to_string())
         ]);
     }
 }
