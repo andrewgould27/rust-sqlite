@@ -1,6 +1,6 @@
 use rust_sqlite::{
-    Lexer,
-    Token
+    lexer::Lexer,
+    lexer::Token
 };
 
 fn main() {
@@ -18,7 +18,7 @@ fn main() {
 
     println!("Passed!");
 
-    let lexer = Lexer::new(query);
+    // let lexer = Lexer::new(query);
     // let tokens = lexer.tokenize();
 
     // let parser = Parser::new(tokens);
