@@ -11,7 +11,9 @@ use crate::ast::{
     DeleteStatement,
     Condition,
     ComparisonOperator,
-    Value
+    Value,
+    OrderByClause,
+    OrderDirection
 };
 
 pub struct Parser<'a> {
@@ -71,10 +73,17 @@ impl<'a> Parser<'a> {
             None 
         };
 
+        let order_by = if self.current_token == Token::Order {
+            self.parse_order_by()?
+        } else {
+            Vec::<OrderByClause>::new()
+        };
+
         Ok(ASTNode::Select(SelectStatement {
             columns,
             table, 
-            condition
+            condition,
+            order_by 
         }))
     }
 
@@ -363,5 +372,45 @@ impl<'a> Parser<'a> {
         };
 
         Ok(Condition::Comparison(column, operator, value))
+    }
+
+    fn parse_order_by(&mut self) -> Result<Vec<OrderByClause>, String> {
+        self.advance();
+
+        if self.current_token != Token::By {
+            return Err("Expected BY after ORDER.".to_string());
+        }
+        self.advance();
+
+        let mut clauses = Vec::new();
+        loop {
+            let column = match &self.current_token {
+                Token::Identifier(name) => {
+                    let col_name = name.clone();
+                    self.advance();
+                    col_name 
+                }
+                _ => return Err("Expected column name in ORDER BY clause.".to_string())
+            };
+
+            let order = if self.current_token == Token::Asc {
+                self.advance();
+                OrderDirection::Asc 
+            } else if self.current_token == Token::Desc {
+                self.advance();
+                OrderDirection::Desc 
+            } else {
+                OrderDirection::Asc
+            };
+
+            clauses.push(OrderByClause { column, order });
+
+            if self.current_token != Token::Comma {
+                break;
+            }
+            self.advance();
+        };
+
+        Ok(clauses)
     }
 }

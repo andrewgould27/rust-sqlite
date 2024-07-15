@@ -4,7 +4,7 @@ mod tests {
     use rust_sqlite::lexer::Lexer;
     use rust_sqlite::parser::Parser;
     use rust_sqlite::ast::{
-        ASTNode, ComparisonOperator, Condition, InsertStatement, SelectStatement, UpdateStatement, Value
+        ASTNode, ComparisonOperator, Condition, InsertStatement, SelectStatement, UpdateStatement, Value, OrderByClause
     };
 
     fn parse_sql(sql: &str) -> Result<ASTNode, String> {
@@ -21,7 +21,8 @@ mod tests {
             ASTNode::Select(SelectStatement {
                 columns: vec!["*".to_string()],
                 table: "users".to_string(),
-                condition: None
+                condition: None,
+                order_by: Vec::<OrderByClause>::new()
             })
         )
     }
@@ -39,6 +40,7 @@ mod tests {
                     ComparisonOperator::GreaterThan,
                     Value::Number(18.0),
                 )),
+                order_by: Vec::<OrderByClause>::new()
             })
         );
     }
@@ -80,6 +82,7 @@ mod tests {
                         op_enum,
                         Value::Number(18.0),
                     )),
+                    order_by: Vec::<OrderByClause>::new()
                 })
             );
         }

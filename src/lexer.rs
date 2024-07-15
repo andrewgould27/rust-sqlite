@@ -14,6 +14,8 @@ pub enum Token {
     Values,
     From,
     Where, 
+    Order, 
+    By, 
     Identifier(String),
     Number(f64),
     String(String),
@@ -22,6 +24,8 @@ pub enum Token {
     Asterisk,
     LeftParen,
     RightParen,
+    Asc, 
+    Desc,
     EOF
 }
 
@@ -69,6 +73,10 @@ impl<'a> Lexer<'a> {
                         "INSERT" => Token::Insert,
                         "UPDATE" => Token::Update, 
                         "DELETE" => Token::Delete, 
+                        "ORDER" => Token::Order, 
+                        "BY" => Token::By, 
+                        "ASC" => Token::Asc, 
+                        "DESC" => Token::Desc, 
                         "SET" => Token::Set, 
                         "FROM" => Token::From, 
                         "WHERE" => Token::Where, 

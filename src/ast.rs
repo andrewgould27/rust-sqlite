@@ -10,7 +10,8 @@ pub enum ASTNode {
 pub struct SelectStatement {
     pub columns: Vec<String>,
     pub table: String, 
-    pub condition: Option<Condition>
+    pub condition: Option<Condition>,
+    pub order_by: Vec<OrderByClause>
 }
 
 #[derive(Debug, PartialEq)]
@@ -52,4 +53,16 @@ pub enum ComparisonOperator {
 pub enum Value {
     Number(f64),
     String(String)
+}
+
+#[derive(Debug, PartialEq)]
+pub struct OrderByClause {
+    pub column: String, 
+    pub order: OrderDirection
+}
+
+#[derive(Debug, PartialEq)]
+pub enum OrderDirection {
+    Asc, 
+    Desc 
 }

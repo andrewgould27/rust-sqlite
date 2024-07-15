@@ -2,7 +2,7 @@
 mod tests {
     use super::*;
     use rust_sqlite::semantic_analyzer::{SemanticAnalyzer, SemanticError};
-    use rust_sqlite::ast::{ASTNode, Condition, SelectStatement, Value, ComparisonOperator};
+    use rust_sqlite::ast::{ASTNode, ComparisonOperator, Condition, OrderByClause, SelectStatement, Value};
     use rust_sqlite::schema::{DatabaseSchema, TableSchema, ColumnType};
     use std::collections::HashMap;
 
@@ -33,6 +33,7 @@ mod tests {
             columns: vec!["name".to_string(), "age".to_string()],
             table: "users".to_string(), 
             condition: None, 
+            order_by: Vec::<OrderByClause>::new()
         };
 
         let result = analyzer.analyze(&ASTNode::Select(select_stmt));
@@ -48,6 +49,7 @@ mod tests {
             columns: vec!["name".to_string()],
             table: "not_a_real_table".to_string(), 
             condition: None, 
+            order_by: Vec::<OrderByClause>::new()
         };
 
         let result = analyzer.analyze(&ASTNode::Select(select_stmt));
@@ -63,6 +65,7 @@ mod tests {
             columns: vec!["not_a_real_column".to_string()],
             table: "users".to_string(), 
             condition: None, 
+            order_by: Vec::<OrderByClause>::new()
         };
 
         let result = analyzer.analyze(&ASTNode::Select(select_stmt));
@@ -81,7 +84,8 @@ mod tests {
                 "age".to_string(), 
                 ComparisonOperator::Equals, 
                 Value::String("eighteen".to_string())
-            ))
+            )),
+            order_by: Vec::<OrderByClause>::new()
         };
 
         let result = analyzer.analyze(&ASTNode::Select(select_stmt));

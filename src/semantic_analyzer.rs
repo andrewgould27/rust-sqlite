@@ -34,6 +34,12 @@ impl SemanticAnalyzer {
             self.analyze_condition(condition, table_schema)?;
         }
 
+        for order_by in &stmt.order_by {
+            if !table_schema.columns.contains_key(&order_by.column) {
+                return Err(SemanticError::ColumnNotFound(order_by.column.clone()))
+            }
+        }
+
         Ok(())
     }
 
