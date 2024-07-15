@@ -2,7 +2,7 @@
 mod tests {
     use super::*;
     use rust_sqlite::semantic_analyzer::{SemanticAnalyzer, SemanticError};
-    use rust_sqlite::ast::{ASTNode, ComparisonOperator, Condition, OrderByClause, SelectStatement, Value};
+    use rust_sqlite::ast::{ASTNode, ComparisonOperator, Condition, OrderByClause, OrderDirection, SelectStatement, Value};
     use rust_sqlite::schema::{DatabaseSchema, TableSchema, ColumnType};
     use std::collections::HashMap;
 
@@ -90,5 +90,26 @@ mod tests {
 
         let result = analyzer.analyze(&ASTNode::Select(select_stmt));
         assert!(matches!(result, Err(SemanticError::TypeMismatch(_))));
+    }
+
+    #[test]
+    fn test_invalid_order_by_column() {
+        let schema = setup_test_schema();
+        let analyzer = SemanticAnalyzer::new(schema);
+
+        let select_stmt = SelectStatement {
+            columns: vec!["name".to_string(), "age".to_string()],
+            table: "users".to_string(),
+            condition: None, 
+            order_by: vec![
+                OrderByClause {
+                    column: "non_existent_column".to_string(),
+                    order: OrderDirection::Asc
+                }
+            ]
+        };
+
+        let result = analyzer.analyze(&ASTNode::Select(select_stmt));
+        assert!(matches!(result, Err(SemanticError::ColumnNotFound(_))));
     }
 }
