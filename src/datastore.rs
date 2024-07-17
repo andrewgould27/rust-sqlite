@@ -57,8 +57,7 @@ impl DataStore {
         if self.schemas.contains_key(&name) {
             return Err(io::Error::new(io::ErrorKind::AlreadyExists, "Table already exists"));
         }
-        
-        // Create an empty CSV file for the data, writing only column names
+
         let data_file_path = self.data_directory.join(format!("{}.csv", name));
         let data_file = File::create(data_file_path)?;
         let mut writer = WriterBuilder::new().from_writer(data_file);
