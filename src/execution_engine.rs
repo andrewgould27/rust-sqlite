@@ -4,6 +4,7 @@ use crate::ast::{
 };
 
 use crate::datastore::{ DataStore };
+use crate::schema::TableSchema;
 
 pub struct ExecutionEngine {
     data_store: DataStore 
